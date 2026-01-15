@@ -13,7 +13,7 @@ const client = new Client({
 const WELCOME_CHANNEL_ID = "951572800253083738";
 const GOODBYE_CHANNEL_ID = "1249723774748721264";
 
-client.once("ready", () => {
+client.once("clientReady", () => {
   console.log(`🍺 ${client.user.tag} is online!`);
 });
 
@@ -41,6 +41,7 @@ May the road rise to meet them. 🍺`
 
 // ✅ Login using token from .env
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
