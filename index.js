@@ -75,7 +75,7 @@ const catResponses = [
   "The cat knocks a mug off the bar. Chaos ensues."
 ];
 
-// 📊 XP System
+// 📊 XP System (in-memory)
 const xp = {};
 const cooldown = new Set();
 
@@ -115,38 +115,66 @@ client.on("guildMemberRemove", member => {
   channel.send(getRandomMessage(goodbyeMessages, member.user.tag));
 });
 
-// 💬 Commands & XP
+// 💬 Commands & XP (prefix commands + leveling + auto role cleanup)
 client.on("messageCreate", message => {
   if (message.author.bot) return;
 
-  // 📊 XP gain
-  if (!cooldown.has(message.author.id)) {
-    xp[message.author.id] = (xp[message.author.id] || 0) + 5;
-    cooldown.add(message.author.id);
+  const userId = message.author.id;
+
+  // 📊 XP gain with cooldown
+  if (!cooldown.has(userId)) {
+    const oldXp = xp[userId] || 0;
+    const newXp = oldXp + 5;
+    xp[userId] = newXp;
+    cooldown.add(userId);
+
+    const oldLevel = getLevelFromXp(oldXp);
+    const newLevel = getLevelFromXp(newXp);
 
     const member = message.member;
-    const newLevel = Math.floor(xp[message.author.id] / 100);
 
-    // 🎖️ Role assignment
-    for (const roleData of levelRoles) {
-      if (newLevel >= roleData.level) {
-        const role = message.guild.roles.cache.find(
-          r => r.name === roleData.name
+    // If they leveled up, check for role rewards
+    if (newLevel > oldLevel) {
+      // Find highest unlocked role
+      const unlocked = levelRoles.filter(r => newLevel >= r.level);
+      if (unlocked.length > 0) {
+        const highest = unlocked[unlocked.length - 1];
+        const highestRole = message.guild.roles.cache.find(
+          r => r.name === highest.name
         );
 
-        if (role && !member.roles.cache.has(role.id)) {
-          member.roles.add(role);
-          message.channel.send(
-            `🍻 **${member.user.username}** has earned the title **${roleData.name}!**`
-          );
+        if (highestRole) {
+          const alreadyHas = member.roles.cache.has(highestRole.id);
+
+          // Remove all lower level roles
+          for (const roleData of levelRoles) {
+            if (roleData.level < highest.level) {
+              const lowerRole = message.guild.roles.cache.find(
+                r => r.name === roleData.name
+              );
+              if (lowerRole && member.roles.cache.has(lowerRole.id)) {
+                member.roles.remove(lowerRole).catch(() => {});
+              }
+            }
+          }
+
+          // Add highest role if they don't already have it
+          if (!alreadyHas) {
+            member.roles.add(highestRole).catch(() => {});
+            message.channel.send(
+              `🍻 **${member.user.username}** has risen to **${highest.name}** (Level ${newLevel})!`
+            );
+          }
         }
       }
     }
 
-    setTimeout(() => cooldown.delete(message.author.id), 60_000);
+    setTimeout(() => cooldown.delete(userId), 60_000);
   }
 
-  const level = Math.floor((xp[message.author.id] || 0) / 100);
+  const userXp = xp[userId] || 0;
+  const level = getLevelFromXp(userXp);
+  
 
   // 🍺 !drink
   if (message.content === "!drink") {
@@ -190,6 +218,7 @@ client.on("messageCreate", message => {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
