@@ -118,7 +118,7 @@ function getLevelFromXp(amount) {
 client.once("clientReady", () => {
   console.log(`🍺 ${client.user.tag} is online!`);
 
-  // 🕯️ Periodic tavern chatter in the chat channel (every 2 hours)
+// 🕯️ Periodic tavern chatter in the chat channel (every 2 hours)
   setInterval(() => {
     const guild = client.guilds.cache.first();
     if (!guild) return;
@@ -128,7 +128,7 @@ client.once("clientReady", () => {
 
     const phrase = tavernChatter[Math.floor(Math.random() * tavernChatter.length)];
     channel.send(phrase).catch(() => {});
-  }, 1000 * 60 * 60 * 2); // 2 hours
+  }, 1000 * 10); // 2 hours
 });
 
 // 👋 Welcome
@@ -355,6 +355,7 @@ client.on("messageCreate", async message => {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
