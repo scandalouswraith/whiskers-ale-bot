@@ -37,7 +37,7 @@ const welcomeMessages = [
   `🐾 **Hey {member}, glad you found our tavern!** The cat on the counter flicks its tail.`,
   `🍺 **{member} joins the fun!** The fire is warm and the ale is cold.`,
   `✨ **Cheers {member}!** Let the stories flow and the laughter fill the room.`,
-  `😿 **{member} arrives!** A curious cat eyes your bag.`
+  `😿 **{member} arrives!** A curious cat eyes your bag.`,
   `🎶 **{member} joins the fun!** The fire is warm, the ale is cold, and the bard is tuning their lute.`
 ];
 
@@ -46,7 +46,7 @@ const goodbyeMessages = [
   `😿 **Farewell {member}!** The hearth grows quieter.`,
   `🥀 **{member} steps back onto the road.** Come back soon.`,
   `💨 **{member} departs.** May warm fires find them.`,
-  `🍺 **{member} leaves the tavern.** Their mug remains… for now.`
+  `🍺 **{member} leaves the tavern.** Their mug remains… for now.`,
   `💨 **{member} has gone on their journey.** Until we meet again, may the tavern’s lights guide you.`,
   `🍂 **{member} has left the tavern.** A cat watches them go. 🍺`
 ];
@@ -190,6 +190,7 @@ client.on("messageCreate", message => {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
