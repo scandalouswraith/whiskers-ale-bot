@@ -26,7 +26,7 @@ const levelRoles = [
   { level: 30, name: "🍻 Esteemed Regular" },
   { level: 40, name: "🍻 House Favorite" },
   { level: 50, name: "🍻 Tavern Fixture" },
-  { level: 65, name: "🏆 Keeper's Confidant" }
+  { level: 65, name: "🏆 Keeper's Confidant" },
   { level: 80, name: "🏆 Legend of the Hearth" },
   { level: 100, name: "🏆 Whiskered Legend" }
 ];
@@ -190,6 +190,7 @@ client.on("messageCreate", message => {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
