@@ -14,6 +14,7 @@ const client = new Client({
 // 🔴 Channel IDs
 const WELCOME_CHANNEL_ID = "951572800253083738";
 const GOODBYE_CHANNEL_ID = "1249723774748721264";
+const CHAT_CHANNEL_ID = "1101697334934515794";
 
 // 🎖️ Level → Role mapping
 const levelRoles = [
@@ -75,6 +76,25 @@ const catResponses = [
   "The cat knocks a mug off the bar. Chaos ensues."
 ];
 
+// 🕯️ Ambient tavern chatter (Option A)
+const tavernChatter = [
+  "🍺 *The bartender polishes a mug, lost in thought...*",
+  "🐾 *A cat jumps onto the counter and stares at everyone.*",
+  "🎶 *Soft music drifts from a bard in the corner.*",
+  "🔥 *The hearth crackles, casting dancing shadows on the walls.*",
+  "💬 *How do I attract all these minions? Two words: funnel cakes.*",
+  "🕯️ *I once served a drink to a Death Knight. It froze over...right in his hands!*",
+  "🥜 *Sorry about the peanut shells on the floor. These minions are slobs.*",
+  "🥨 *All the best minions come here. I've got the spicy pretzel mustard.*",
+  "💬 *Have you met the League of Explorers? Nice folk. Great hats.*",
+  "🕯️ *Candles flicker gently as conversations hum through the tavern.*",
+  "🍞 *The smell of fresh bread and stew fills the air.*",
+  "🎲 *Dice clatter across a nearby table, followed by cheers and groans.*",
+  "🐈 *The tavern cat curls up on an empty chair, claiming it as their own.*",
+  "🍻 *Mugs clink together as another round is poured.*",
+  "🌙 *Night deepens outside, but the tavern stays warm and bright.*"
+];
+
 // 📊 XP System (in-memory)
 const xp = {};
 const cooldown = new Set();
@@ -97,6 +117,18 @@ function getLevelFromXp(amount) {
 // ✅ Bot ready
 client.once("clientReady", () => {
   console.log(`🍺 ${client.user.tag} is online!`);
+
+  // 🕯️ Periodic tavern chatter in the chat channel (every 2 hours)
+  setInterval(() => {
+    const guild = client.guilds.cache.first();
+    if (!guild) return;
+
+    const channel = guild.channels.cache.get(CHAT_CHANNEL_ID);
+    if (!channel || !channel.send) return;
+
+    const phrase = tavernChatter[Math.floor(Math.random() * tavernChatter.length)];
+    channel.send(phrase).catch(() => {});
+  }, 1000 * 60 * 60 * 2); // 2 hours
 });
 
 // 👋 Welcome
@@ -218,7 +250,7 @@ client.on("messageCreate", message => {
     );
   }
 
-  // 📜 !rank (same as !level, just nicer name)
+  // 📜 !rank
   if (message.content === "!rank") {
     return message.reply(
       `📊 **Your Tavern Standing**\nXP: ${userXp}\nLevel: ${level}`
@@ -252,6 +284,7 @@ client.on("messageCreate", message => {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
