@@ -139,6 +139,14 @@ client.on("guildMemberAdd", member => {
   if (!channel) return;
 
   channel.send(getRandomMessage(welcomeMessages, member));
+
+  // ⭐ Give base level role: "New Patron, lvl 1"
+  const baseRoleName = levelRoles[0].name; // uses 🍺 New Patron, lvl 1
+  const baseRole = member.guild.roles.cache.find(r => r.name === baseRoleName);
+
+  if (baseRole && !member.roles.cache.has(baseRole.id)) {
+    member.roles.add(baseRole).catch(() => {});
+  }
 });
 
 // 👋 Goodbye
@@ -152,7 +160,7 @@ client.on("guildMemberRemove", member => {
 });
 
 // 💬 Commands & XP (prefix commands + leveling + auto role cleanup)
-client.on("messageCreate", message => {
+client.on("messageCreate", async message => {
   if (message.author.bot) return;
 
   const userId = message.author.id;
@@ -280,21 +288,50 @@ client.on("messageCreate", message => {
 
     return message.reply(board);
   }
+  
+    // 🛠️ Admin command: initialize base role for all members
+  if (message.content === "!initpatrons") {
+    // (Optional) Only allow admins to run this:
+    // if (!message.member.permissions.has("Administrator")) {
+    //   return message.reply("You must be an admin to use this command.");
+    // }
+
+    const guild = message.guild;
+    if (!guild) return;
+
+    const baseRoleName = levelRoles[0].name;
+    const baseRole = guild.roles.cache.find(r => r.name === baseRoleName);
+
+    if (!baseRole) {
+      return message.reply(
+        `I couldn't find the base role **${baseRoleName}**. Make sure it exists first.`
+      );
+    }
+
+    await message.reply("⏳ Assigning base tavern role to members without a level…");
+
+    const members = await guild.members.fetch();
+
+    let count = 0;
+    for (const [, member] of members) {
+      if (member.user.bot) continue;
+
+      // Check if member already has ANY level role
+      const hasLevelRole = member.roles.cache.some(role =>
+        levelRoles.some(lr => lr.name === role.name)
+      );
+
+      if (!hasLevelRole && !member.roles.cache.has(baseRole.id)) {
+        await member.roles.add(baseRole).catch(() => {});
+        count++;
+      }
+    }
+
+    return message.channel.send(
+      `✅ Done! Gave **${baseRoleName}** to **${count}** members who had no tavern level role.`
+    );
+  }
 });
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
