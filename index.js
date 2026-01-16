@@ -289,41 +289,49 @@ client.on("messageCreate", async message => {
     return message.reply(board);
   }
   
-    // 🛠️ Admin command: initialize base role for all members
-  if (message.content === "!initpatrons") {
-    // (Optional) Only allow admins to run this:
-    // if (!message.member.permissions.has("Administrator")) {
-    //   return message.reply("You must be an admin to use this command.");
-    // }
-
+  // 🛠️ Admin command: initialize base role for all members
+  if (message.content.trim().toLowerCase() === "!initpatrons") {
     const guild = message.guild;
-    if (!guild) return;
+    if (!guild) {
+      return message.reply("I can only run this command inside a server tavern, not in DMs.");
+    }
 
-    const baseRoleName = levelRoles[0].name;
+    const baseRoleName = levelRoles[0].name; // 🍺 New Patron, lvl 1
     const baseRole = guild.roles.cache.find(r => r.name === baseRoleName);
 
     if (!baseRole) {
       return message.reply(
-        `I couldn't find the base role **${baseRoleName}**. Make sure it exists first.`
+        `I couldn't find the base role **${baseRoleName}**. Make sure the role name matches exactly.`
       );
     }
 
     await message.reply("⏳ Assigning base tavern role to members without a level…");
 
-    const members = await guild.members.fetch();
+    let members;
+    try {
+      members = await guild.members.fetch();
+    } catch (err) {
+      console.error("Error fetching members for !initpatrons:", err);
+      return message.channel.send(
+        "❌ I couldn't fetch the server members. Check that I have the **Guild Members Intent** enabled in the Developer Portal."
+      );
+    }
 
     let count = 0;
     for (const [, member] of members) {
       if (member.user.bot) continue;
 
-      // Check if member already has ANY level role
       const hasLevelRole = member.roles.cache.some(role =>
         levelRoles.some(lr => lr.name === role.name)
       );
 
       if (!hasLevelRole && !member.roles.cache.has(baseRole.id)) {
-        await member.roles.add(baseRole).catch(() => {});
-        count++;
+        try {
+          await member.roles.add(baseRole);
+          count++;
+        } catch (err) {
+          console.error(`Failed to add base role to ${member.user.tag}:`, err);
+        }
       }
     }
 
@@ -331,7 +339,8 @@ client.on("messageCreate", async message => {
       `✅ Done! Gave **${baseRoleName}** to **${count}** members who had no tavern level role.`
     );
   }
-});
+
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
