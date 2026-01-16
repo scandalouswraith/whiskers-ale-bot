@@ -76,14 +76,14 @@ const catResponses = [
   "The cat knocks a mug off the bar. Chaos ensues."
 ];
 
-// 🕯️ Ambient tavern chatter (Option A)
+// 🕯️ Ambient tavern chatter
 const tavernChatter = [
   "🍺 *The bartender polishes a mug, lost in thought...*",
   "🐾 *A cat jumps onto the counter and stares at everyone.*",
   "🎶 *Soft music drifts from a bard in the corner.*",
   "🔥 *The hearth crackles, casting dancing shadows on the walls.*",
   "💬 *How do I attract all these minions? Two words: funnel cakes.*",
-  "🕯️ *I once served a drink to a Death Knight. It froze over...right in his hands!*",
+  "🕯️ *I once served a drink to a Death Knight. It froze over... right in his hands!*",
   "🥜 *Sorry about the peanut shells on the floor. These minions are slobs.*",
   "🥨 *All the best minions come here. I've got the spicy pretzel mustard.*",
   "💬 *Have you met the League of Explorers? Nice folk. Great hats.*",
@@ -141,7 +141,7 @@ client.on("guildMemberAdd", member => {
   channel.send(getRandomMessage(welcomeMessages, member));
 
   // ⭐ Give base level role: "New Patron, lvl 1"
-  const baseRoleName = levelRoles[0].name; // uses 🍺 New Patron, lvl 1
+  const baseRoleName = levelRoles[0].name;
   const baseRole = member.guild.roles.cache.find(r => r.name === baseRoleName);
 
   if (baseRole && !member.roles.cache.has(baseRole.id)) {
@@ -179,7 +179,6 @@ client.on("messageCreate", async message => {
 
     // If they leveled up, check for role rewards
     if (newLevel > oldLevel) {
-      // Find highest unlocked role
       const unlocked = levelRoles.filter(r => newLevel >= r.level);
       if (unlocked.length > 0) {
         const highest = unlocked[unlocked.length - 1];
@@ -288,7 +287,7 @@ client.on("messageCreate", async message => {
 
     return message.reply(board);
   }
-  
+
   // 🛠️ Admin command: initialize base role for all members
   if (message.content.trim().toLowerCase() === "!initpatrons") {
     const guild = message.guild;
@@ -339,8 +338,10 @@ client.on("messageCreate", async message => {
       `✅ Done! Gave **${baseRoleName}** to **${count}** members who had no tavern level role.`
     );
   }
-
+});
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
+
 
