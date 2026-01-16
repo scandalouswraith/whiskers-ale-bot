@@ -47,7 +47,7 @@ const goodbyeMessages = [
   `🥀 **{member} steps back onto the road.** Come back soon.`,
   `💨 **{member} departs.** May warm fires find them.`,
   `🍺 **{member} leaves the tavern.** Their mug remains… for now.`,
-  `💨 **{member} has gone on their journey.** Until we meet again, may the tavern’s lights guide you.`,
+  `💨 **{member} has gone on their journey.** Until we meet again, may the tavern’s lights guide them.`,
   `🍂 **{member} has left the tavern.** A cat watches them go. 🍺`
 ];
 
@@ -88,6 +88,10 @@ function rollDice(sides = 20) {
 function getRandomMessage(messages, member) {
   return messages[Math.floor(Math.random() * messages.length)]
     .replace("{member}", member);
+}
+
+function getLevelFromXp(amount) {
+  return Math.floor((amount || 0) / 100);
 }
 
 // ✅ Bot ready
@@ -174,11 +178,10 @@ client.on("messageCreate", message => {
 
   const userXp = xp[userId] || 0;
   const level = getLevelFromXp(userXp);
-  
 
   // 🍺 !drink
   if (message.content === "!drink") {
-    message.reply(
+    return message.reply(
       `🍺 **The bartender slides you a drink:** ${
         drinks[Math.floor(Math.random() * drinks.length)]
       }`
@@ -187,7 +190,7 @@ client.on("messageCreate", message => {
 
   // 🍲 !special
   if (message.content === "!special") {
-    message.reply(
+    return message.reply(
       `🪵 **Tonight’s Tavern Special:** ${
         specials[Math.floor(Math.random() * specials.length)]
       }`
@@ -196,28 +199,60 @@ client.on("messageCreate", message => {
 
   // 🐾 !cat
   if (message.content === "!petcat" || message.content === "!cat") {
-    message.reply(
+    return message.reply(
       `🐾 ${catResponses[Math.floor(Math.random() * catResponses.length)]}`
     );
   }
 
   // 🎲 !roll
   if (message.content.startsWith("!roll")) {
-    message.reply(
+    return message.reply(
       `🎲 You roll a **${rollDice()}**. The tavern holds its breath…`
     );
   }
 
   // 📜 !level
   if (message.content === "!level") {
-    message.reply(
-      `📊 **Tavern Standing**\nXP: ${xp[message.author.id] || 0}\nLevel: ${level}`
+    return message.reply(
+      `📊 **Tavern Standing**\nXP: ${userXp}\nLevel: ${level}`
     );
+  }
+
+  // 📜 !rank (same as !level, just nicer name)
+  if (message.content === "!rank") {
+    return message.reply(
+      `📊 **Your Tavern Standing**\nXP: ${userXp}\nLevel: ${level}`
+    );
+  }
+
+  // 🏆 !leaderboard
+  if (message.content === "!leaderboard") {
+    const entries = Object.entries(xp);
+
+    if (entries.length === 0) {
+      return message.reply(
+        "No one has earned any tavern reputation yet. The night is young!"
+      );
+    }
+
+    const top = entries
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+
+    let board = "🏆 **Tavern Leaderboard**\n\n";
+
+    top.forEach(([id, xpValue], index) => {
+      const lvl = getLevelFromXp(xpValue);
+      board += `${index + 1}. <@${id}> — XP: ${xpValue} (Level ${lvl})\n`;
+    });
+
+    return message.reply(board);
   }
 });
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
