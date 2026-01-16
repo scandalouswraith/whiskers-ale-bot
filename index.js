@@ -20,15 +20,15 @@ const levelRoles = [
   { level: 1, name: "🍺 New Patron" },
   { level: 5, name: "🍺 Tavern Guest" },
   { level: 10, name: "🍺 Tavern Regular" },
-  { level: 15, name: "🐾 Friend of the Tavern" }
-  { level: 20, name: "🐾 Hearthside Companion" }
-  { level: 25, name: "🐾 Honored Patron" }
-  { level: 30, name: "🍻 Esteemed Regular" }
-  { level: 40, name: "🍻 House Favorite" }
-  { level: 50, name: "🍻 Tavern Fixture" }
+  { level: 15, name: "🐾 Friend of the Tavern" },
+  { level: 20, name: "🐾 Hearthside Companion" },
+  { level: 25, name: "🐾 Honored Patron" },
+  { level: 30, name: "🍻 Esteemed Regular" },
+  { level: 40, name: "🍻 House Favorite" },
+  { level: 50, name: "🍻 Tavern Fixture" },
   { level: 65, name: "🏆 Keeper's Confidant" }
-  { level: 80, name: "🏆 Legend of the Hearth" }
-  { level: 100, name: "🏆 Whiskered Legend" }
+  { level: 80, name: "🏆 Legend of the Hearth" },
+  { level: 100, name: "🏆 Whiskered Legend" },
 ];
 
 // 🌟 Greetings & Goodbyes
@@ -190,6 +190,7 @@ client.on("messageCreate", message => {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
