@@ -17,18 +17,18 @@ const GOODBYE_CHANNEL_ID = "1249723774748721264";
 
 // 🎖️ Level → Role mapping
 const levelRoles = [
-  { level: 1, name: "🍺 New Patron" },
-  { level: 5, name: "🍺 Tavern Guest" },
-  { level: 10, name: "🍺 Tavern Regular" },
-  { level: 15, name: "🐾 Friend of the Tavern" },
-  { level: 20, name: "🐾 Hearthside Companion" },
-  { level: 25, name: "🐾 Honored Patron" },
-  { level: 30, name: "🍻 Esteemed Regular" },
-  { level: 40, name: "🍻 House Favorite" },
-  { level: 50, name: "🍻 Tavern Fixture" },
-  { level: 65, name: "🏆 Keeper's Confidant" },
-  { level: 80, name: "🏆 Legend of the Hearth" },
-  { level: 100, name: "🏆 Whiskered Legend" }
+  { level: 1, name: "🍺 New Patron, lvl 1" },
+  { level: 5, name: "🍺 Tavern Guest, lvl 5" },
+  { level: 10, name: "🍺 Tavern Regular, lvl 10" },
+  { level: 15, name: "🐾 Friend of the Tavern, lvl 15" },
+  { level: 20, name: "🐾 Hearthside Companion, lvl 20" },
+  { level: 25, name: "🐾 Honored Patron, lvl 25" },
+  { level: 30, name: "🍻 Esteemed Regular, lvl 30" },
+  { level: 40, name: "🍻 House Favorite, lvl 40" },
+  { level: 50, name: "🍻 Tavern Fixture, lvl 50" },
+  { level: 65, name: "✨ Keeper's Confidant, lvl 65" },
+  { level: 80, name: "✨ Legend of the Hearth, lvl 80" },
+  { level: 100, name: "🏆 Whiskered Legend, lvl 100" }
 ];
 
 // 🌟 Greetings & Goodbyes
@@ -190,6 +190,7 @@ client.on("messageCreate", message => {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
