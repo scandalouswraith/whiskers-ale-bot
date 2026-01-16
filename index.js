@@ -351,10 +351,34 @@ client.on("messageCreate", async message => {
       console.error("Failed to send initpatrons completion message:", err);
     }
   }
+
+  //reponses to thank you
+  const welcomeReplies = [
+  "🍻 You're most welcome!",
+  "🐾 Anytime, traveler.",
+  "🍺 Glad to be of service!",
+  "🔥 May your tales be many and your drinks be full!",
+  "🎶 Think nothing of it — enjoy the hearth!"
+];
+
+if (message.reference && !message.author.bot) {
+  const repliedTo = await message.channel.messages.fetch(message.reference.messageId).catch(() => null);
+
+  if (repliedTo && repliedTo.author.id === client.user.id) {
+    const thankWords = ["thank you", "thanks", "ty", "tysm", "thx", "thank you good sir"];
+    if (thankWords.some(w => message.content.toLowerCase().includes(w))) {
+      const line = welcomeReplies[Math.floor(Math.random() * welcomeReplies.length)];
+      message.reply(line).catch(() => {});
+    }
+  }
+}
+
+});
 });
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
