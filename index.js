@@ -304,44 +304,58 @@ client.on("messageCreate", async message => {
       );
     }
 
-    await message.reply("⏳ Assigning base tavern role to members without a level…");
+    // Try to send the "working..." message, but don't crash if it fails
+    try {
+      await message.reply("⏳ Assigning base tavern role to **all non-bot members**…");
+    } catch (err) {
+      console.error("Failed to send initpatrons start message:", err);
+    }
 
     let members;
     try {
       members = await guild.members.fetch();
+      console.log(`!initpatrons: fetched ${members.size} members in ${guild.name}`);
     } catch (err) {
       console.error("Error fetching members for !initpatrons:", err);
-      return message.channel.send(
-        "❌ I couldn't fetch the server members. Check that I have the **Guild Members Intent** enabled in the Developer Portal."
-      );
+      try {
+        await message.channel.send(
+          "❌ I couldn't fetch the server members. Check that I have the **Server Members Intent** enabled in the Developer Portal."
+        );
+      } catch (e) {
+        console.error("Also couldn't send error message for !initpatrons:", e);
+      }
+      return;
     }
 
-    let count = 0;
+    let attempted = 0;
+    let success = 0;
+
     for (const [, member] of members) {
       if (member.user.bot) continue;
 
-      const hasLevelRole = member.roles.cache.some(role =>
-        levelRoles.some(lr => lr.name === role.name)
-      );
+      attempted++;
 
-      if (!hasLevelRole && !member.roles.cache.has(baseRole.id)) {
-        try {
-          await member.roles.add(baseRole);
-          count++;
-        } catch (err) {
-          console.error(`Failed to add base role to ${member.user.tag}:`, err);
-        }
+      try {
+        await member.roles.add(baseRole);
+        success++;
+      } catch (err) {
+        console.error(`Failed to add base role to ${member.user.tag}:`, err);
       }
     }
 
-    return message.channel.send(
-      `✅ Done! Gave **${baseRoleName}** to **${count}** members who had no tavern level role.`
-    );
+    try {
+      await message.channel.send(
+        `✅ Done! Tried to give **${baseRoleName}** to **${attempted}** members. Successfully updated **${success}**.`
+      );
+    } catch (err) {
+      console.error("Failed to send initpatrons completion message:", err);
+    }
   }
 });
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
