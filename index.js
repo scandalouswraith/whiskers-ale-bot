@@ -374,10 +374,10 @@ if (message.reference && !message.author.bot) {
 }
 
 });
-});
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
