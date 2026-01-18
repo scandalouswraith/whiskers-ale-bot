@@ -38,7 +38,7 @@ const welcomeMessages = [
   `🐾 **Hey {member}, glad you found our tavern!** The cat on the counter flicks its tail.`,
   `🍺 **{member} joins the fun!** The fire is warm and the ale is cold.`,
   `✨ **Cheers {member}!** Let the stories flow and the laughter fill the room.`,
-  `😿 **{member} arrives!** A curious cat eyes your bag.`,
+  `🐱 **{member} arrives!** A curious cat eyes your bag.`,
   `🎶 **{member} joins the fun!** The fire is warm, the ale is cold, and the bard is tuning their lute.`
 ];
 
@@ -377,6 +377,7 @@ if (message.reference && !message.author.bot) {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
