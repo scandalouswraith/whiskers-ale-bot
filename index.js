@@ -82,8 +82,16 @@ const tavernChatter = [
   "🐾 *A cat jumps onto the counter and stares at everyone.*",
   "🎶 *Soft music drifts from a bard in the corner.*",
   "🔥 *The hearth crackles, casting dancing shadows on the walls.*",
+  "🌙 *Last call echoes softly. Someone insists they’re ‘fine’.*",
+  "🕯️ *Candlelight flickers as secrets trade hands with coin.*",
+  "🥃 *A strong drink slides across the bar—no questions asked.*",
+  "🐈 *The tavern cat judges the final patrons with ancient disappointment.*",
   "💬 *How do I attract all these minions? Two words: funnel cakes.*",
   "🕯️ *I once served a drink to a Death Knight. It froze over... right in his hands!*",
+  "🍺 *A midday pour foams over the rim. The bartender pretends not to notice.*",
+  "🎯 *A dart hits the board—close enough for bragging rights.*",
+  "🧹 *Someone swears they’ll clean up later. The cat remains unconvinced.*",
+  "🍲 *Stew bubbles gently while stories grow louder.*",
   "🥜 *Sorry about the peanut shells on the floor. These minions are slobs.*",
   "🥨 *All the best minions come here. I've got the spicy pretzel mustard.*",
   "💬 *Have you met the League of Explorers? Nice folk. Great hats.*",
@@ -92,6 +100,14 @@ const tavernChatter = [
   "🎲 *Dice clatter across a nearby table, followed by cheers and groans.*",
   "🐈 *The tavern cat curls up on an empty chair, claiming it as their own.*",
   "🍻 *Mugs clink together as another round is poured.*",
+  "☀️ *Morning light slips through the shutters. The first kettle begins to simmer.*",
+  "🍞 *Fresh bread hits the table. The tavern cat watches… respectfully.*",
+  "🔥 *The hearth crackles as the tavern fills with laughter and clinking mugs.*",
+  "🎶 *A bard tests a chord. The room hushes… for half a second.*",
+  "🎲 *Dice clatter across a table—followed by cheers and dramatic groans.*",
+  "🐾 *A cat weaves between boots like it owns the place. It does.*",
+  "🥣 *A quiet breakfast crowd murmurs over warm bowls and warmer gossip.*",
+  "🐾 *A sleepy cat stretches, then immediately claims the best chair.*",
   "🌙 *Night deepens outside, but the tavern stays warm and bright.*"
 ];
 
@@ -102,6 +118,15 @@ const cooldown = new Set();
 // 🎲 Dice
 function rollDice(sides = 20) {
   return Math.floor(Math.random() * sides) + 1;
+}
+
+// Tavern Games
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function getMentionedMember(message) {
+  return message.mentions?.members?.first() || null;
 }
 
 // 🧰 Helpers
@@ -128,7 +153,7 @@ client.once("clientReady", () => {
 
     const phrase = tavernChatter[Math.floor(Math.random() * tavernChatter.length)];
     channel.send(phrase).catch(() => {});
-  }, 1000 * 60 * 60 * 8); // 8 hours
+  }, 1000 * 60 * 60 * 2); // 2 hours
 });
 
 // 👋 Welcome
@@ -249,6 +274,86 @@ client.on("messageCreate", async message => {
       `🎲 You roll a **${rollDice()}**. The tavern holds its breath…`
     );
   }
+  
+  // 🪙 !coinflip
+  if (message.content.trim().toLowerCase() === "!coinflip") {
+    const result = Math.random() < 0.5 ? "Heads" : "Tails";
+    return message.reply(`🪙 You flip a coin… **${result}**!`);
+  }
+
+  // 🎯 !darts
+  if (message.content.trim().toLowerCase() === "!darts") {
+    const score = rollDice(20);
+    let flavor = "🎯 A decent throw!";
+    if (score === 20) flavor = "🎯 **Bullseye!** The tavern erupts in cheers!";
+    if (score <= 3) flavor = "🎯 Oof. That dart had other plans.";
+    return message.reply(`🎯 You throw a dart… **${score}/20**. ${flavor}`);
+  }
+
+  // 💪 !armwrestle @user
+  if (message.content.trim().toLowerCase().startsWith("!armwrestle")) {
+    const opponent = getMentionedMember(message);
+    if (!opponent) {
+      return message.reply("💪 Who are you arm-wrestling? Try `!armwrestle @someone`.");
+    }
+    if (opponent.user.bot) {
+      return message.reply("💪 The bartender refuses to arm-wrestle machines. (The cat approves.)");
+    }
+    if (opponent.id === message.author.id) {
+      return message.reply("💪 You wrestle your own arm. The cat looks embarrassed for you.");
+    }
+
+    const a = rollDice(20);
+    const b = rollDice(20);
+
+    let result;
+    if (a === b) {
+      result = `It’s a stalemate! **${message.author.username}** (${a}) vs **${opponent.user.username}** (${b}) — the table creaks ominously.`;
+    } else if (a > b) {
+      result = `🏆 **${message.author.username}** wins! (${a} vs ${b})`;
+    } else {
+      result = `🏆 **${opponent.user.username}** wins! (${b} vs ${a})`;
+    }
+
+    return message.reply(`💪 Arm-wrestle match!\n${result}`);
+  }
+
+  // 🃏 !blackjack (single-hand quick game)
+  if (message.content.trim().toLowerCase() === "!blackjack") {
+    const draw = () => Math.min(10, rollDice(13)); // 1–13 mapped to 1–10
+    let total = draw() + draw();
+
+    // Simple "dealer" target between 16–21
+    const dealer = 16 + rollDice(6); // 17–22-ish
+
+    let outcome = "";
+    if (total === 21) outcome = "🃏 **Blackjack!** The bartender nods respectfully.";
+    else if (total > 21) outcome = "💥 Bust! The tavern cat knocks your chips off the table.";
+    else if (dealer > 21 || total > dealer) outcome = "🏆 You win! Drinks taste better when you’re lucky.";
+    else if (total === dealer) outcome = "🤝 Push (tie). The house pretends this is fair.";
+    else outcome = "🥀 You lose. The hearth crackles sympathetically.";
+
+    return message.reply(`🃏 You draw **${total}**. Dealer shows **${dealer}**.\n${outcome}`);
+  }
+
+  // 🎲 !highroll @user (d20 duel)
+  if (message.content.trim().toLowerCase().startsWith("!highroll")) {
+    const opponent = getMentionedMember(message);
+    if (!opponent) {
+      return message.reply("🎲 Try `!highroll @someone` to duel rolls!");
+    }
+
+    const a = rollDice(20);
+    const b = rollDice(20);
+
+    if (a === b) {
+      return message.reply(`🎲 **Tie!** ${a} vs ${b}. The tavern demands a rematch!`);
+    }
+
+    const winner = a > b ? message.author.username : opponent.user.username;
+    return message.reply(`🎲 Rolls: **${message.author.username}** rolled **${a}**, **${opponent.user.username}** rolled **${b}**.\n🏆 **${winner}** wins!`);
+  }
+
 
   // 📜 !level
   if (message.content === "!level") {
@@ -351,9 +456,9 @@ client.on("messageCreate", async message => {
       console.error("Failed to send initpatrons completion message:", err);
     }
   }
-
+  
   //reponses to thank you
-  const welcomeReplies = [
+const welcomeReplies = [
   "🍻 You're most welcome!",
   "🐾 Anytime, traveler.",
   "🍺 Glad to be of service!",
@@ -377,6 +482,8 @@ if (message.reference && !message.author.bot) {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
+
 
 
 
