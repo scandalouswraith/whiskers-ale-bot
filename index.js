@@ -153,7 +153,7 @@ client.once("clientReady", () => {
 
     const phrase = tavernChatter[Math.floor(Math.random() * tavernChatter.length)];
     channel.send(phrase).catch(() => {});
-  }, 1000 * 60 * 60 * 2); // 2 hours
+  }, 1000 * 60 * 60 * 8); // 8 hours
 });
 
 // 👋 Welcome
@@ -482,6 +482,7 @@ if (message.reference && !message.author.bot) {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
 
