@@ -617,29 +617,32 @@ if (message.content.trim().toLowerCase().startsWith("!order")) {
     }
   }
   
-// 🙏 Replies to "thank you" for ANY bot response (reply-to-bot OR mention-bot)
 const welcomeReplies = [
   "🍻 You're most welcome!",
   "🐾 Anytime, traveler.",
   "🍺 Glad to be of service!",
   "🔥 May your tales be many and your drinks be full!",
-  "🎶 Think nothing of it — enjoy the hearth!"
+  "🎶 Think nothing of it — enjoy the hearth!",
+
   "🕯️ A pleasure to serve. The fire is always warm here.",
-  "🍺 No trouble at all — that’s what I’m here for.",
-  "🐈 The cat approves of your manners. (That’s rare.)",
-  "✨ You’re always welcome at the hearth.",
+  "🍺 No trouble at all — that's what I'm here for.",
+  "🐈 The cat approves of your manners. (That's rare.)",
+  "✨ You're always welcome at the hearth.",
   "🥂 Served with a smile — and maybe a little magic.",
+
   "🪵 Just doing my part to keep spirits high.",
-  "🍻 Happy to help! Another round whenever you’re ready.",
+  "🍻 Happy to help! Another round whenever you're ready.",
   "🐾 Courtesy like that earns you a warm seat by the fire.",
   "🔥 A kind word goes a long way in this tavern.",
-  "🍺 No thanks needed — but I’ll take one anyway.",
+  "🍺 No thanks needed — but I'll take one anyway.",
+
   "🕯️ The tavern lives to serve.",
   "🐈 The cat flicks its tail in approval.",
   "✨ Always a pleasure to host good company.",
-  "🍻 It’s what keeps the mugs full and the stories flowing.",
+  "🍻 It's what keeps the mugs full and the stories flowing.",
   "🎶 A thank-you well heard — now enjoy the night."
 ];
+
 
 const thankWords = ["thank you", "thanks", "ty", "tysm", "thx", "thank u"];
 
@@ -676,4 +679,5 @@ if (containsThanks(message.content)) {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
