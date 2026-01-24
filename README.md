@@ -3,6 +3,19 @@ Just wanted to make a bot for my Tavern themed discord server. Bob, the Bartende
 Commands include:
 !drink
 !special
+!order
+!menu
+
 !petcat or !cat
 !roll
+!coinflip
+!highroll @user
+!blackjack
+!armwrestle @user
+!darts
+
 !level
+!rank
+!leaderboard
+!gold
+!balance
