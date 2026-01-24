@@ -59,15 +59,61 @@ const drinks = [
   "Spiced Apple Cider 🍎",
   "Moonberry Wine 🌙",
   "Whiskers’ Cream Ale 🐾",
-  "Smoked Oak Whiskey 🪵"
+  "Smoked Oak Whiskey 🪵",
+  "Hearthfire Mulled Wine 🔥",
+  "Frostveil Lager ❄️",
+  "Golden Hop Pale Ale 🌾",
+  "Black Cat Espresso ☕",
+  "Midnight Plum Brandy 🍑",
+  "Stormcaller Rum 🌩️",
+  "Lavender Honey Milk 🥛"
 ];
 
 const specials = [
   "Slow-roasted stew with crusty bread 🍲",
   "Herbed chicken pie 🥧",
   "Spiced cider by the hearth 🔥",
-  "Fresh fish (the cat is watching closely) 🐟"
+  "Fresh fish (the cat is watching closely) 🐟",
+  "Cheddar & Onion Bread 🍞",
+  "Mushroom & Thyme Tart 🍄",
+  "Spiced Root Vegetable Roast 🥕",
+  "Garlic Butter Skillet Potatoes 🥔",
+  "Honey-glazed Ham Slab 🍖",
+  "Berry Hand Pies 🫐",
+  "Cat’s Share Cream Bowl 🐾"
 ];
+
+// 🧾 Tavern Menu
+const menu = {
+  drinks: [
+    { name: "Honeyed Mead", emoji: "🍯", price: 3, desc: "Sweet, warm, and dangerously easy to love." },
+    { name: "Dark Dwarven Stout", emoji: "🍺", price: 4, desc: "Thick as a dungeon wall—smooth as a bard’s lie." },
+    { name: "Spiced Apple Cider", emoji: "🍎", price: 3, desc: "A cozy sip that tastes like autumn stories." },
+    { name: "Moonberry Wine", emoji: "🌙", price: 5, desc: "Fruity, mysterious, and a little enchanted." },
+    { name: "Whiskers’ Cream Ale", emoji: "🐾", price: 4, desc: "House favorite—served with a judgmental cat stare." },
+    { name: "Smoked Oak Whiskey", emoji: "🪵", price: 6, desc: "Smoky, bold, and perfect for late-night confessions." },
+	{ name: "Hearthfire Mulled Wine", emoji: "🔥", price: 5, desc: "Served hot with cloves and a warning not to gulp." },
+    { name: "Frostveil Lager", emoji: "❄️", price: 4, desc: "Crisp enough to fog the mug." },
+    { name: "Golden Hop Pale Ale", emoji: "🌾", price: 4, desc: "Bright, bitter, and dangerously refreshing." },
+    { name: "Black Cat Espresso", emoji: "☕", price: 3, desc: "Strong enough to wake the dead—or adventurers." },
+    { name: "Midnight Plum Brandy", emoji: "🍑", price: 6, desc: "Smooth, dark, and best enjoyed slowly." },
+    { name: "Stormcaller Rum", emoji: "🌩️", price: 6, desc: "Bold, sweet, and rumored to summon trouble." },
+    { name: "Lavender Honey Milk", emoji: "🥛", price: 2, desc: "Surprisingly soothing. The cat approves." }
+  ],
+  food: [
+    { name: "Slow-roasted Stew", emoji: "🍲", price: 6, desc: "Hearty stew with crusty bread—pure comfort." },
+    { name: "Herbed Chicken Pie", emoji: "🥧", price: 6, desc: "Flaky crust, savory filling, instant happiness." },
+    { name: "Hearthside Cider", emoji: "🔥", price: 4, desc: "Hot cider served near the fire—watch your fingers." },
+    { name: "Fresh Fish", emoji: "🐟", price: 5, desc: "The cat watches this one… very closely." },
+    { name: "Cheddar & Onion Bread", emoji: "🍞", price: 4, desc: "Pulled apart faster than it cools." },
+    { name: "Mushroom & Thyme Tart", emoji: "🍄", price: 5, desc: "Earthy, buttery, and deceptively filling." },
+    { name: "Spiced Root Vegetable Roast", emoji: "🥕", price: 5, desc: "A comforting plate for weary travelers." },
+    { name: "Garlic Butter Skillet Potatoes", emoji: "🥔", price: 4, desc: "Crisp edges, soft centers, zero regrets." },
+    { name: "Honey-glazed Ham Slab", emoji: "🍖", price: 7, desc: "Sweet, savory, and meant to be shared (but isn’t)." },
+    { name: "Berry Hand Pies", emoji: "🫐", price: 4, desc: "Warm, flaky, and gone far too quickly." },
+    { name: "Cat’s Share Cream Bowl", emoji: "🐾", price: 1, desc: "You didn’t order this. The cat did." }
+  ]
+};
 
 const catResponses = [
   "The tavern cat accepts your affection… briefly. 🐾",
@@ -111,9 +157,14 @@ const tavernChatter = [
   "🌙 *Night deepens outside, but the tavern stays warm and bright.*"
 ];
 
-// 📊 XP System (in-memory)
+// 📊 XP + Gold System (in-memory)
 const xp = {};
+const gold = {};          // userId -> gold amount
 const cooldown = new Set();
+
+// 💰 starting gold for new patrons
+const STARTING_GOLD = 20;
+
 
 // 🎲 Dice
 function rollDice(sides = 20) {
@@ -139,21 +190,58 @@ function getLevelFromXp(amount) {
   return Math.floor((amount || 0) / 100);
 }
 
+function getGold(userId) {
+  if (gold[userId] === undefined) gold[userId] = STARTING_GOLD;
+  return gold[userId];
+}
+
+function addGold(userId, amount) {
+  gold[userId] = getGold(userId) + amount;
+  if (gold[userId] < 0) gold[userId] = 0;
+  return gold[userId];
+}
+
+function formatGold(amount) {
+  return `💰 ${amount} gold`;
+}
+
+
+function normalize(text) {
+  return (text || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "") // remove punctuation/emojis
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function findMenuItem(query) {
+  const q = normalize(query);
+  if (!q) return null;
+
+  const all = [...menu.drinks, ...menu.food];
+  return all.find(item => normalize(item.name) === q) ||
+         all.find(item => normalize(item.name).includes(q)) ||
+         all.find(item => q.includes(normalize(item.name)));
+}
+
+
 // ✅ Bot ready
 client.once("clientReady", () => {
   console.log(`🍺 ${client.user.tag} is online!`);
 
-// 🕯️ Periodic tavern chatter in the chat channel (every 2 hours)
-  setInterval(() => {
-    const guild = client.guilds.cache.first();
-    if (!guild) return;
+// 🕯️ Periodic tavern chatter in the chat channel (every 8 hours)
+    setInterval(async () => {
+    try {
+      const channel = await client.channels.fetch(CHAT_CHANNEL_ID);
+      if (!channel || !channel.isTextBased()) return;
 
-    const channel = guild.channels.cache.get(CHAT_CHANNEL_ID);
-    if (!channel || !channel.send) return;
-
-    const phrase = tavernChatter[Math.floor(Math.random() * tavernChatter.length)];
-    channel.send(phrase).catch(() => {});
+      const phrase = tavernChatter[Math.floor(Math.random() * tavernChatter.length)];
+      await channel.send(phrase);
+    } catch (err) {
+      console.error("Tavern chatter failed:", err);
+    }
   }, 1000 * 60 * 60 * 8); // 8 hours
+
 });
 
 // 👋 Welcome
@@ -195,6 +283,8 @@ client.on("messageCreate", async message => {
     const oldXp = xp[userId] || 0;
     const newXp = oldXp + 5;
     xp[userId] = newXp;
+    const isCommand = message.content.trim().startsWith("!");
+  if (!isCommand) addGold(userId, 1);
     cooldown.add(userId);
 
     const oldLevel = getLevelFromXp(oldXp);
@@ -260,6 +350,69 @@ client.on("messageCreate", async message => {
       }`
     );
   }
+
+  // 🍽️ !menu
+  if (message.content.trim().toLowerCase() === "!menu") {
+    const drinkLines = menu.drinks.map(d => `• ${d.emoji} **${d.name}** — ${d.desc}`);
+    const foodLines = menu.food.map(f => `• ${f.emoji} **${f.name}** — ${f.desc}`);
+
+    return message.reply(
+      `🧾 **Whiskers & Ale Menu**\n\n` +
+      `🍺 **Drinks**\n${drinkLines.join("\n")}\n\n` +
+      `🍲 **Food**\n${foodLines.join("\n")}\n\n` +
+      `To order: **!order <item>**  (example: **!order moonberry wine**)`
+    );
+  }
+
+// 🥂 !order (random or specific)
+if (message.content.trim().toLowerCase().startsWith("!order")) {
+  const raw = message.content.slice("!order".length).trim();
+
+  // If no item specified, pick random
+  let item;
+  if (!raw) {
+    const all = [...menu.drinks, ...menu.food];
+    item = all[Math.floor(Math.random() * all.length)];
+  } else if (raw.toLowerCase() === "list") {
+    return message.reply("Type **!menu** to see what’s on offer. 🍻");
+  } else {
+    item = findMenuItem(raw);
+    if (!item) {
+      return message.reply(
+        `🤔 I couldn’t find **"${raw}"** on the menu.\nTry **!menu** or order something like **!order honeyed mead**.`
+      );
+    }
+  }
+
+  const flavor = [
+    `The bartender slides it over with a wink.`,
+    `A cat watches the delivery like it’s official business.`,
+    `The hearth crackles approvingly.`,
+    `“Good choice,” the bartender says, polishing the bar.`,
+    `Served fresh—no questions asked.`
+  ];
+
+  // 💰 Charge gold for the order
+  const cost = item.price || 0;
+  const wallet = getGold(userId);
+
+  if (wallet < cost) {
+    return message.reply(
+      `😿 You reach for your coin purse… but you only have **${formatGold(wallet)}**.\n` +
+      `That costs **${formatGold(cost)}**. Try something cheaper or earn a bit more gold!`
+    );
+  }
+
+  addGold(userId, -cost);
+  const remaining = getGold(userId);
+
+  return message.reply(
+    `${item.emoji} **Order up!** ${message.author} receives **${item.name}**.\n` +
+    `💸 Cost: **${formatGold(cost)}** • Remaining: **${formatGold(remaining)}**\n` +
+    `*${pick(flavor)}*`
+  );
+}
+
 
   // 🐾 !cat
   if (message.content === "!petcat" || message.content === "!cat") {
@@ -369,6 +522,13 @@ client.on("messageCreate", async message => {
     );
   }
 
+  // 💰 !gold / !balance
+  if (["!gold", "!balance"].includes(message.content.trim().toLowerCase())) {
+    const wallet = getGold(userId);
+    return message.reply(`🪙 **Your Coin Purse**: ${formatGold(wallet)}`);
+  }
+
+
   // 🏆 !leaderboard
   if (message.content === "!leaderboard") {
     const entries = Object.entries(xp);
@@ -457,41 +617,62 @@ client.on("messageCreate", async message => {
     }
   }
   
-  //reponses to thank you
+// 🙏 Replies to "thank you" for ANY bot response (reply-to-bot OR mention-bot)
 const welcomeReplies = [
   "🍻 You're most welcome!",
   "🐾 Anytime, traveler.",
   "🍺 Glad to be of service!",
   "🔥 May your tales be many and your drinks be full!",
   "🎶 Think nothing of it — enjoy the hearth!"
+  "🕯️ A pleasure to serve. The fire’s always warm here.",
+  "🍺 No trouble at all — that’s what I’m here for.",
+  "🐈 The cat approves of your manners. (That’s rare.)",
+  "✨ You’re always welcome at the hearth.",
+  "🥂 Served with a smile — and maybe a little magic.",
+  "🪵 Just doing my part to keep spirits high.",
+  "🍻 Happy to help! Another round whenever you’re ready.",
+  "🐾 Courtesy like that earns you a warm seat by the fire.",
+  "🔥 A kind word goes a long way in this tavern.",
+  "🍺 No thanks needed — but I’ll take one anyway.",
+  "🕯️ The tavern lives to serve.",
+  "🐈 The cat flicks its tail in approval.",
+  "✨ Always a pleasure to host good company.",
+  "🍻 It’s what keeps the mugs full and the stories flowing.",
+  "🎶 A thank-you well heard — now enjoy the night."
 ];
 
-if (message.reference && !message.author.bot) {
-  const repliedTo = await message.channel.messages.fetch(message.reference.messageId).catch(() => null);
+const thankWords = ["thank you", "thanks", "ty", "tysm", "thx", "thank u"];
 
-  if (repliedTo && repliedTo.author.id === client.user.id) {
-    const thankWords = ["thank you", "thanks", "ty", "tysm", "thx", "thank you good sir"];
-    if (thankWords.some(w => message.content.toLowerCase().includes(w))) {
-      const line = welcomeReplies[Math.floor(Math.random() * welcomeReplies.length)];
-      message.reply(line).catch(() => {});
+function containsThanks(text) {
+  const t = (text || "").toLowerCase();
+  return thankWords.some(w => t.includes(w));
+}
+
+if (containsThanks(message.content)) {
+  let repliedToBot = false;
+
+  // If this message is a reply, check if they replied to the bot
+  if (message.reference?.messageId) {
+    const repliedTo = await message.channel.messages
+      .fetch(message.reference.messageId)
+      .catch(() => null);
+
+    if (repliedTo && repliedTo.author?.id === client.user.id) {
+      repliedToBot = true;
     }
   }
+
+  const mentionedBot = message.mentions?.users?.has(client.user.id);
+
+  // Only respond if it's aimed at the bot (reply-to-bot or mention-bot)
+  if (repliedToBot || mentionedBot) {
+    const line = welcomeReplies[Math.floor(Math.random() * welcomeReplies.length)];
+    return message.reply(line).catch(() => {});
+  }
 }
+
 
 });
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
-
-
-
-
-
-
-
-
-
-
-
-
-
