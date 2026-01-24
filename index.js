@@ -624,7 +624,7 @@ const welcomeReplies = [
   "🍺 Glad to be of service!",
   "🔥 May your tales be many and your drinks be full!",
   "🎶 Think nothing of it — enjoy the hearth!"
-  "🕯️ A pleasure to serve. The fire’s always warm here.",
+  "🕯️ A pleasure to serve. The fire is always warm here.",
   "🍺 No trouble at all — that’s what I’m here for.",
   "🐈 The cat approves of your manners. (That’s rare.)",
   "✨ You’re always welcome at the hearth.",
@@ -676,3 +676,4 @@ if (containsThanks(message.content)) {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
