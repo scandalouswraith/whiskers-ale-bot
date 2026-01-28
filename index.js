@@ -240,7 +240,7 @@ client.once("clientReady", () => {
     } catch (err) {
       console.error("Tavern chatter failed:", err);
     }
-  }, 1000 * 60 * 60 * 8); // 8 hours
+  }, 1000 * 60 * 60 * 12); // 12 hours
 
 });
 
@@ -679,5 +679,6 @@ if (containsThanks(message.content)) {
 
 // 🔐 Login
 client.login(process.env.DISCORD_TOKEN);
+
 
 
