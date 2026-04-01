@@ -229,7 +229,7 @@ function findMenuItem(query) {
 client.once("clientReady", () => {
   console.log(`🍺 ${client.user.tag} is online!`);
 
-// 🕯️ Periodic tavern chatter in the chat channel (every 8 hours)
+// 🕯️ Periodic tavern chatter in the chat channel (every 36 hours)
     setInterval(async () => {
     try {
       const channel = await client.channels.fetch(CHAT_CHANNEL_ID);
@@ -240,7 +240,7 @@ client.once("clientReady", () => {
     } catch (err) {
       console.error("Tavern chatter failed:", err);
     }
-  }, 1000 * 60 * 60 * 24); // 24 hours
+  }, 1000 * 60 * 60 * 36); // 36 hours
 
 });
 
