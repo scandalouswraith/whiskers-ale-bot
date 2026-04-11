@@ -18,18 +18,18 @@ const CHAT_CHANNEL_ID = "1101697334934515794";
 
 // 🎖️ Level → Role mapping
 const levelRoles = [
-  { level: 1, name: "🍺 𝐍𝐞𝐰 𝐏𝐚𝐭𝐫𝐨𝐧, 𝐥𝐯𝐥 1" },
-  { level: 5, name: "🍺 𝐓𝐚𝐯𝐞𝐫𝐧 𝐆𝐮𝐞𝐬𝐭, 𝐥𝐯𝐥 5" },
-  { level: 10, name: "🍺 𝐓𝐚𝐯𝐞𝐫𝐧 𝐑𝐞𝐠𝐮𝐥𝐚𝐫, 𝐥𝐯𝐥 10" },
-  { level: 15, name: "🐾 𝐅𝐫𝐢𝐞𝐧𝐝 𝐨𝐟 𝐭𝐡𝐞 𝐓𝐚𝐯𝐞𝐫𝐧, 𝐥𝐯𝐥 15" },
-  { level: 20, name: "🐾 𝐇𝐞𝐚𝐫𝐭𝐡𝐬𝐢𝐝𝐞 𝐂𝐨𝐦𝐩𝐚𝐧𝐢𝐨𝐧, 𝐥𝐯𝐥 20" },
-  { level: 25, name: "🐾 𝐇𝐨𝐧𝐨𝐫𝐞𝐝 𝐏𝐚𝐭𝐫𝐨𝐧, 𝐥𝐯𝐥 25" },
-  { level: 30, name: "🍻 𝐄𝐬𝐭𝐞𝐞𝐦𝐞𝐝 𝐑𝐞𝐠𝐮𝐥𝐚𝐫, 𝐥𝐯𝐥 30" },
-  { level: 40, name: "🍻 𝐇𝐨𝐮𝐬𝐞 𝐅𝐚𝐯𝐨𝐫𝐢𝐭𝐞, 𝐥𝐯𝐥 40" },
-  { level: 50, name: "🍻 𝐓𝐚𝐯𝐞𝐫𝐧 𝐅𝐢𝐱𝐭𝐮𝐫𝐞, 𝐥𝐯𝐥 50" },
-  { level: 65, name: "✨ 𝐊𝐞𝐞𝐩𝐞𝐫'𝐬 𝐂𝐨𝐧𝐟𝐢𝐝𝐚𝐧𝐭, 𝐥𝐯𝐥 65" },
-  { level: 80, name: "✨ 𝐋𝐞𝐠𝐞𝐧𝐝 𝐨𝐟 𝐭𝐡𝐞 𝐇𝐞𝐚𝐫𝐭𝐡, 𝐥𝐯𝐥 80" },
-  { level: 100, name: "🐈 𝐖𝐡𝐢𝐬𝐤𝐞𝐫𝐞𝐝 𝐋𝐞𝐠𝐞𝐧𝐝, 𝐥𝐯𝐥 100" }
+  { level: 1, id: "1459698956782145598" },
+  { level: 5, id: "1459699377382621472" },
+  { level: 10, id: "1459698903925526792" },
+  { level: 15, id: "1459699696883732500" },
+  { level: 20, id: "1459699613622861864" },
+  { level: 25, id: "1459699760964436060" },
+  { level: 30, id: "1459700285860745417" },
+  { level: 40, id: "1459700428437459105" },
+  { level: 50, id: "1459700094118006936" },
+  { level: 65, id: "1459700604573188238" },
+  { level: 80, id: "1459700674768928902" },
+  { level: 100, id: "1459700747242311681" }
 ];
 
 // 🌟 Greetings & Goodbyes
@@ -177,7 +177,40 @@ try {
 
 const cooldown = new Set();
 
+async function syncRoles(member, level) {
+  if (!member || !member.guild) return;
 
+  const unlocked = levelRoles.filter(r => level >= r.level);
+  if (!unlocked.length) return;
+
+  const highest = unlocked[unlocked.length - 1];
+
+  try {
+    // Remove lower level roles
+    for (const roleData of levelRoles) {
+      if (roleData.level < highest.level) {
+        const role = member.guild.roles.cache.get(roleData.id);
+        if (role && member.roles.cache.has(role.id)) {
+          await member.roles.remove(role);
+        }
+      }
+    }
+
+    // Add highest role
+    const highestRole = member.guild.roles.cache.get(highest.id);
+
+    if (highestRole && !member.roles.cache.has(highestRole.id)) {
+      await member.roles.add(highestRole);
+
+      return highestRole; // return for level-up message
+    }
+
+  } catch (err) {
+    console.error("Role sync failed:", err);
+  }
+
+  return null;
+}
 
 
 // 💰 starting gold for new patrons
@@ -296,19 +329,24 @@ client.on("messageCreate", async message => {
 
   const userId = message.author.id;
 
-  // 📊 XP gain with cooldown
+
 // 📊 XP gain with cooldown
 if (!cooldown.has(userId)) {
   const oldXp = xp[userId] || 0;
   const newXp = oldXp + 25;
 
   xp[userId] = newXp;
+
   fs.writeFile("./xp.json", JSON.stringify(xp, null, 2), err => {
     if (err) console.error("XP save failed:", err);
   });
 
-  const isCommand = message.content.trim().startsWith("!");
-  if (!isCommand) {
+  const member = message.member;
+  const oldLevel = getLevelFromXp(oldXp);
+  const newLevel = getLevelFromXp(newXp);
+
+  // 💰 passive gold
+  if (!message.content.startsWith("!")) {
     addGold(userId, 1);
     fs.writeFile("./gold.json", JSON.stringify(gold, null, 2), err => {
       if (err) console.error("Gold save failed:", err);
@@ -317,46 +355,23 @@ if (!cooldown.has(userId)) {
 
   cooldown.add(userId);
 
-  const oldLevel = getLevelFromXp(oldXp);
-  const newLevel = getLevelFromXp(newXp);
-  const member = message.member;
+// 🎉 LEVEL UP
+if (newLevel > oldLevel && member) {
+  const newRole = await syncRoles(member, newLevel);
 
-  // 🎉 LEVEL UP
-  if (newLevel > oldLevel) {
-    const unlocked = levelRoles.filter(r => newLevel >= r.level);
-    if (unlocked.length > 0) {
-      const highest = unlocked[unlocked.length - 1];
-      const highestRole = message.guild.roles.cache.find(
-        r => r.name === highest.name
-      );
-
-      if (highestRole) {
-        const alreadyHas = member.roles.cache.has(highestRole.id);
-
-        // Remove lower roles
-        for (const roleData of levelRoles) {
-          if (roleData.level < highest.level) {
-            const lowerRole = message.guild.roles.cache.find(
-              r => r.name === roleData.name
-            );
-            if (lowerRole && member.roles.cache.has(lowerRole.id)) {
-              member.roles.remove(lowerRole).catch(() => {});
-            }
-          }
-        }
-
-        // Add new role
-        if (!alreadyHas) {
-          member.roles.add(highestRole).catch(() => {});
-          message.channel.send(
-            `🍻 **${member.user.username}** has risen to **${highest.name}** (Level ${newLevel})!`
-          );
-        }
-      }
-    }
+  if (newRole) {
+    message.channel.send(
+      `🍻 **${member.user.username}** has reached **Level ${newLevel}** and earned <@&${newRole.id}>!`
+    );
   }
+}
 
-  setTimeout(() => cooldown.delete(userId), 60_000);
+// ✅ ALWAYS ensure correct role
+if (member) {
+  await syncRoles(member, newLevel);
+}
+
+  setTimeout(() => cooldown.delete(userId), 5000);
 }
 
 
