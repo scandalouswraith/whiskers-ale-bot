@@ -281,7 +281,7 @@ client.on("messageCreate", async message => {
   // 📊 XP gain with cooldown
   if (!cooldown.has(userId)) {
     const oldXp = xp[userId] || 0;
-    const newXp = oldXp + 5;
+    const newXp = oldXp + 25;
     xp[userId] = newXp;
     const isCommand = message.content.trim().startsWith("!");
   if (!isCommand) addGold(userId, 1);
