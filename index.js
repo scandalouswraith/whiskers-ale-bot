@@ -18,18 +18,18 @@ const CHAT_CHANNEL_ID = "1101697334934515794";
 
 // 🎖️ Level → Role mapping
 const levelRoles = [
-  { level: 1, name: "🍺 New Patron, lvl 1" },
-  { level: 5, name: "🍺 Tavern Guest, lvl 5" },
-  { level: 10, name: "🍺 Tavern Regular, lvl 10" },
-  { level: 15, name: "🐾 Friend of the Tavern, lvl 15" },
-  { level: 20, name: "🐾 Hearthside Companion, lvl 20" },
-  { level: 25, name: "🐾 Honored Patron, lvl 25" },
-  { level: 30, name: "🍻 Esteemed Regular, lvl 30" },
-  { level: 40, name: "🍻 House Favorite, lvl 40" },
-  { level: 50, name: "🍻 Tavern Fixture, lvl 50" },
-  { level: 65, name: "✨ Keeper's Confidant, lvl 65" },
-  { level: 80, name: "✨ Legend of the Hearth, lvl 80" },
-  { level: 100, name: "🏆 Whiskered Legend, lvl 100" }
+  { level: 1, name: "🍺 𝐍𝐞𝐰 𝐏𝐚𝐭𝐫𝐨𝐧, 𝐥𝐯𝐥 1" },
+  { level: 5, name: "🍺 𝐓𝐚𝐯𝐞𝐫𝐧 𝐆𝐮𝐞𝐬𝐭, 𝐥𝐯𝐥 5" },
+  { level: 10, name: "🍺 𝐓𝐚𝐯𝐞𝐫𝐧 𝐑𝐞𝐠𝐮𝐥𝐚𝐫, 𝐥𝐯𝐥 10" },
+  { level: 15, name: "🐾 𝐅𝐫𝐢𝐞𝐧𝐝 𝐨𝐟 𝐭𝐡𝐞 𝐓𝐚𝐯𝐞𝐫𝐧, 𝐥𝐯𝐥 15" },
+  { level: 20, name: "🐾 𝐇𝐞𝐚𝐫𝐭𝐡𝐬𝐢𝐝𝐞 𝐂𝐨𝐦𝐩𝐚𝐧𝐢𝐨𝐧, 𝐥𝐯𝐥 20" },
+  { level: 25, name: "🐾 𝐇𝐨𝐧𝐨𝐫𝐞𝐝 𝐏𝐚𝐭𝐫𝐨𝐧, 𝐥𝐯𝐥 25" },
+  { level: 30, name: "🍻 𝐄𝐬𝐭𝐞𝐞𝐦𝐞𝐝 𝐑𝐞𝐠𝐮𝐥𝐚𝐫, 𝐥𝐯𝐥 30" },
+  { level: 40, name: "🍻 𝐇𝐨𝐮𝐬𝐞 𝐅𝐚𝐯𝐨𝐫𝐢𝐭𝐞, 𝐥𝐯𝐥 40" },
+  { level: 50, name: "🍻 𝐓𝐚𝐯𝐞𝐫𝐧 𝐅𝐢𝐱𝐭𝐮𝐫𝐞, 𝐥𝐯𝐥 50" },
+  { level: 65, name: "✨ 𝐊𝐞𝐞𝐩𝐞𝐫'𝐬 𝐂𝐨𝐧𝐟𝐢𝐝𝐚𝐧𝐭, 𝐥𝐯𝐥 65" },
+  { level: 80, name: "✨ 𝐋𝐞𝐠𝐞𝐧𝐝 𝐨𝐟 𝐭𝐡𝐞 𝐇𝐞𝐚𝐫𝐭𝐡, 𝐥𝐯𝐥 80" },
+  { level: 100, name: "🐈 𝐖𝐡𝐢𝐬𝐤𝐞𝐫𝐞𝐝 𝐋𝐞𝐠𝐞𝐧𝐝, 𝐥𝐯𝐥 100" }
 ];
 
 // 🌟 Greetings & Goodbyes
