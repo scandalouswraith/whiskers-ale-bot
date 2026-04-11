@@ -175,6 +175,11 @@ try {
   gold = {};
 }
 
+const cooldown = new Set();
+
+
+
+
 // 💰 starting gold for new patrons
 const STARTING_GOLD = 20;
 
@@ -239,7 +244,7 @@ function findMenuItem(query) {
 
 
 // ✅ Bot ready
-client.once("clientReady", () => {
+client.once("ready", () => {
   console.log(`🍺 ${client.user.tag} is online!`);
 
 // 🕯️ Periodic tavern chatter in the chat channel (every 36 hours)
@@ -292,68 +297,68 @@ client.on("messageCreate", async message => {
   const userId = message.author.id;
 
   // 📊 XP gain with cooldown
+// 📊 XP gain with cooldown
 if (!cooldown.has(userId)) {
   const oldXp = xp[userId] || 0;
   const newXp = oldXp + 25;
 
   xp[userId] = newXp;
+  fs.writeFile("./xp.json", JSON.stringify(xp, null, 2), err => {
+    if (err) console.error("XP save failed:", err);
+  });
 
   const isCommand = message.content.trim().startsWith("!");
-  if (!isCommand) addGold(userId, 1);
+  if (!isCommand) {
+    addGold(userId, 1);
+    fs.writeFile("./gold.json", JSON.stringify(gold, null, 2), err => {
+      if (err) console.error("Gold save failed:", err);
+    });
+  }
 
   cooldown.add(userId);
 
   const oldLevel = getLevelFromXp(oldXp);
   const newLevel = getLevelFromXp(newXp);
-
   const member = message.member;
 
-  // (rest of your level logic stays the same)
+  // 🎉 LEVEL UP
+  if (newLevel > oldLevel) {
+    const unlocked = levelRoles.filter(r => newLevel >= r.level);
+    if (unlocked.length > 0) {
+      const highest = unlocked[unlocked.length - 1];
+      const highestRole = message.guild.roles.cache.find(
+        r => r.name === highest.name
+      );
+
+      if (highestRole) {
+        const alreadyHas = member.roles.cache.has(highestRole.id);
+
+        // Remove lower roles
+        for (const roleData of levelRoles) {
+          if (roleData.level < highest.level) {
+            const lowerRole = message.guild.roles.cache.find(
+              r => r.name === roleData.name
+            );
+            if (lowerRole && member.roles.cache.has(lowerRole.id)) {
+              member.roles.remove(lowerRole).catch(() => {});
+            }
+          }
+        }
+
+        // Add new role
+        if (!alreadyHas) {
+          member.roles.add(highestRole).catch(() => {});
+          message.channel.send(
+            `🍻 **${member.user.username}** has risen to **${highest.name}** (Level ${newLevel})!`
+          );
+        }
+      }
+    }
+  }
 
   setTimeout(() => cooldown.delete(userId), 60_000);
 }
 
-	
-    // If they leveled up, check for role rewards
-    if (newLevel > oldLevel) {
-      const unlocked = levelRoles.filter(r => newLevel >= r.level);
-      if (unlocked.length > 0) {
-        const highest = unlocked[unlocked.length - 1];
-        const highestRole = message.guild.roles.cache.find(
-          r => r.name === highest.name
-        );
-
-        if (highestRole) {
-          const alreadyHas = member.roles.cache.has(highestRole.id);
-
-          // Remove all lower level roles
-          for (const roleData of levelRoles) {
-            if (roleData.level < highest.level) {
-              const lowerRole = message.guild.roles.cache.find(
-                r => r.name === roleData.name
-              );
-              if (lowerRole && member.roles.cache.has(lowerRole.id)) {
-                member.roles.remove(lowerRole).catch(() => {});
-              }
-            }
-          }
-
-          // Add highest role if they don't already have it
-          if (!alreadyHas) {
-            member.roles.add(highestRole).catch(() => {});
-            message.channel.send(
-              `🍻 **${member.user.username}** has risen to **${highest.name}** (Level ${newLevel})!`
-            );
-          }
-        }
-      }
-    }
-
-    setTimeout(() => cooldown.delete(userId), 60_000);
-  }
-
-  const userXp = xp[userId] || 0;
-  const level = getLevelFromXp(userXp);
 
   // 🍺 !drink
   if (message.content === "!drink") {
@@ -530,19 +535,15 @@ if (message.content.trim().toLowerCase().startsWith("!order")) {
   }
 
 
-  // 📜 !level
-  if (message.content === "!level") {
-    return message.reply(
-      `📊 **Tavern Standing**\nXP: ${userXp}\nLevel: ${level}`
-    );
-  }
+// 📜 !level / !rank
+if (message.content === "!level" || message.content === "!rank") {
+  const userXp = xp[userId] || 0;
+  const level = getLevelFromXp(userXp);
 
-  // 📜 !rank
-  if (message.content === "!rank") {
-    return message.reply(
-      `📊 **Your Tavern Standing**\nXP: ${userXp}\nLevel: ${level}`
-    );
-  }
+  return message.reply(
+    `📊 **Tavern Standing**\nXP: ${userXp}\nLevel: ${level}`
+  );
+}
 
   // 💰 !gold / !balance
   if (["!gold", "!balance"].includes(message.content.trim().toLowerCase())) {
