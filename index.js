@@ -158,9 +158,22 @@ const tavernChatter = [
 ];
 
 // 📊 XP + Gold System (in-memory)
-const xp = {};
-const gold = {};          // userId -> gold amount
-const cooldown = new Set();
+const fs = require("fs");
+
+let xp = {};
+let gold = {};
+
+try {
+  xp = JSON.parse(fs.readFileSync("./xp.json", "utf8"));
+} catch {
+  xp = {};
+}
+
+try {
+  gold = JSON.parse(fs.readFileSync("./gold.json", "utf8"));
+} catch {
+  gold = {};
+}
 
 // 💰 starting gold for new patrons
 const STARTING_GOLD = 20;
@@ -279,19 +292,28 @@ client.on("messageCreate", async message => {
   const userId = message.author.id;
 
   // 📊 XP gain with cooldown
-  if (!cooldown.has(userId)) {
-    const oldXp = xp[userId] || 0;
-    const newXp = oldXp + 25;
-    xp[userId] = newXp;
-    const isCommand = message.content.trim().startsWith("!");
+if (!cooldown.has(userId)) {
+  const oldXp = xp[userId] || 0;
+  const newXp = oldXp + 25;
+
+  xp[userId] = newXp;
+
+  const isCommand = message.content.trim().startsWith("!");
   if (!isCommand) addGold(userId, 1);
-    cooldown.add(userId);
 
-    const oldLevel = getLevelFromXp(oldXp);
-    const newLevel = getLevelFromXp(newXp);
+  cooldown.add(userId);
 
-    const member = message.member;
+  const oldLevel = getLevelFromXp(oldXp);
+  const newLevel = getLevelFromXp(newXp);
 
+  const member = message.member;
+
+  // (rest of your level logic stays the same)
+
+  setTimeout(() => cooldown.delete(userId), 60_000);
+}
+
+	
     // If they leveled up, check for role rewards
     if (newLevel > oldLevel) {
       const unlocked = levelRoles.filter(r => newLevel >= r.level);
