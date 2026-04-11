@@ -331,6 +331,7 @@ client.on("messageCreate", async message => {
 
 
 // 📊 XP gain with cooldown
+
 if (!cooldown.has(userId)) {
   const oldXp = xp[userId] || 0;
   const newXp = oldXp + 25;
@@ -341,7 +342,15 @@ if (!cooldown.has(userId)) {
     if (err) console.error("XP save failed:", err);
   });
 
-  const member = message.member;
+  // ✅ IMPORTANT FIX: always fetch full member
+  let member;
+  try {
+    member = await message.guild.members.fetch(userId);
+  } catch (err) {
+    console.error("Member fetch failed:", err);
+    return;
+  }
+
   const oldLevel = getLevelFromXp(oldXp);
   const newLevel = getLevelFromXp(newXp);
 
@@ -355,21 +364,25 @@ if (!cooldown.has(userId)) {
 
   cooldown.add(userId);
 
-// 🎉 LEVEL UP
-if (newLevel > oldLevel && member) {
-  const newRole = await syncRoles(member, newLevel);
+  // 🎉 LEVEL UP
+  if (newLevel > oldLevel) {
+    try {
+      const newRole = await syncRoles(member, newLevel);
 
-  if (newRole) {
-    message.channel.send(
-      `🍻 **${member.user.username}** has reached **Level ${newLevel}** and earned <@&${newRole.id}>!`
-    );
+      if (newRole) {
+        await message.channel.send(
+          `🍻 **${member.user.username}** has reached **Level ${newLevel}** and earned <@&${newRole.id}>!`
+        );
+      } else {
+        console.log("No role returned (syncRoles returned null)");
+      }
+    } catch (err) {
+      console.error("LEVEL UP ROLE ERROR:", err);
+    }
+  } else {
+    // ✅ always keep roles correct
+    await syncRoles(member, newLevel);
   }
-}
-
-// ✅ ALWAYS ensure correct role
-if (member) {
-  await syncRoles(member, newLevel);
-}
 
   setTimeout(() => cooldown.delete(userId), 5000);
 }
