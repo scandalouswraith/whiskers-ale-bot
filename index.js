@@ -376,12 +376,17 @@ async function handleLevelUp(member, level) {
     );
   }
 
-    // 📜 !level
-  if (message.content === "!level") {
-    return message.reply(
-      `📊 **Tavern Standing**\nXP: ${userXp}\nLevel: ${level}`
-    );
-  }
+// 📜 !level
+if (content === "!level") {
+  const userXp = xp[userId] || 0;
+  const level = getLevelFromXp(userXp);
+
+return message.reply(
+  `📊 **Tavern Standing**\n` +
+  `🍺 Level: **${level}**\n` +
+  `✨ XP: ${userXp}\n` +
+  `🪙 Gold: ${getGold(userId)}`
+);
 
     // 🏆 !leaderboard
   if (message.content === "!leaderboard") {
