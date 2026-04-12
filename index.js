@@ -381,12 +381,13 @@ if (content === "!level") {
   const userXp = xp[userId] || 0;
   const level = getLevelFromXp(userXp);
 
-return message.reply(
-  `📊 **Tavern Standing**\n` +
-  `🍺 Level: **${level}**\n` +
-  `✨ XP: ${userXp}\n` +
-  `🪙 Gold: ${getGold(userId)}`
-);
+  return message.reply(
+    `📊 **Tavern Standing**\n` +
+    `🍺 Level: **${level}**\n` +
+    `✨ XP: ${userXp}\n` +
+    `🪙 Gold: ${getGold(userId)}`
+  );
+}
 
     // 🏆 !leaderboard
   if (message.content === "!leaderboard") {
