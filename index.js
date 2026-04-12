@@ -227,6 +227,7 @@ client.on("messageCreate", async message => {
   const userId = message.author.id;
   const content = message.content.toLowerCase();
 
+
   // XP
 if (!cooldown.has(userId)) {
   const oldXp = xp[userId] || 0;
@@ -466,30 +467,51 @@ async function handleLevelUp(member, level) {
   if (content === "!gold") {
     return message.reply(formatGold(getGold(userId)));
   }
-});
-
-  //reponses to thank you
+  
+  // 🙏 Responses to "thank you"
 const welcomeReplies = [
   "🍻 You're most welcome!",
   "🐾 Anytime, traveler.",
   "🍺 Glad to be of service!",
   "🔥 May your tales be many and your drinks be full!",
-  "🎶 Think nothing of it — enjoy the hearth!"
+  "🎶 Think nothing of it — enjoy the hearth!",
+  "🕯️ The hearth is always warm for you.",
+  "🐈 The cat approves of your manners."
 ];
 
-if (message.reference && !message.author.bot) {
-  const repliedTo = await message.channel.messages.fetch(message.reference.messageId).catch(() => null);
+const thankWords = ["thank you", "thanks", "ty", "tysm", "thx", "thank u"];
 
-  if (repliedTo && repliedTo.author.id === client.user.id) {
-    const thankWords = ["thank you", "thanks", "ty", "tysm", "thx", "thank you good sir"];
-    if (thankWords.some(w => message.content.toLowerCase().includes(w))) {
-      const line = welcomeReplies[Math.floor(Math.random() * welcomeReplies.length)];
-      message.reply(line).catch(() => {});
-    }
-  }
+function containsThanks(text) {
+  const t = (text || "").toLowerCase();
+  return thankWords.some(w => t.includes(w));
 }
 
+if (containsThanks(message.content)) {
+  let repliedToBot = false;
+
+  // ✅ Check if replying to bot
+  if (message.reference?.messageId) {
+    const repliedTo = await message.channel.messages
+      .fetch(message.reference.messageId)
+      .catch(() => null);
+
+    if (repliedTo?.author?.id === client.user.id) {
+      repliedToBot = true;
+    }
+  }
+
+  // ✅ Check if bot is mentioned
+  const mentionedBot = message.mentions?.users?.has(client.user.id);
+
+  // ✅ Only respond if it's actually directed at the bot
+  if (repliedToBot || mentionedBot) {
+    const line = welcomeReplies[Math.floor(Math.random() * welcomeReplies.length)];
+    return message.reply(line).catch(() => {});
+  }
+}
 });
+
+
 
 // ================= LOGIN =================
 client.login(process.env.DISCORD_TOKEN);
