@@ -220,7 +220,7 @@ client.on("guildMemberRemove", member => {
   if (channel) channel.send(pick(goodbyeMessages).replace("{member}", member.user.tag));
 });
 
-// ================= COMMANDS =================
+// ==================================
 client.on("messageCreate", async message => {
   if (message.author.bot) return;
 
@@ -278,6 +278,70 @@ async function handleLevelUp(member, level) {
 
   // ================= COMMANDS =================
 
+    // 🛠️ Admin command: initialize base role for all members
+  if (message.content.trim().toLowerCase() === "!initpatrons") {
+    const guild = message.guild;
+    if (!guild) {
+      return message.reply("I can only run this command inside a server tavern, not in DMs.");
+    }
+
+    const baseRoleName = levelRoles[0].name; // 🍺 New Patron, lvl 1
+    const baseRole = guild.roles.cache.find(r => r.name === baseRoleName);
+
+    if (!baseRole) {
+      return message.reply(
+        `I couldn't find the base role **${baseRoleName}**. Make sure the role name matches exactly.`
+      );
+    }
+
+    // Try to send the "working..." message, but don't crash if it fails
+    try {
+      await message.reply("⏳ Assigning base tavern role to **all non-bot members**…");
+    } catch (err) {
+      console.error("Failed to send initpatrons start message:", err);
+    }
+
+    let members;
+    try {
+      members = await guild.members.fetch();
+      console.log(`!initpatrons: fetched ${members.size} members in ${guild.name}`);
+    } catch (err) {
+      console.error("Error fetching members for !initpatrons:", err);
+      try {
+        await message.channel.send(
+          "❌ I couldn't fetch the server members. Check that I have the **Server Members Intent** enabled in the Developer Portal."
+        );
+      } catch (e) {
+        console.error("Also couldn't send error message for !initpatrons:", e);
+      }
+      return;
+    }
+
+    let attempted = 0;
+    let success = 0;
+
+    for (const [, member] of members) {
+      if (member.user.bot) continue;
+
+      attempted++;
+
+      try {
+        await member.roles.add(baseRole);
+        success++;
+      } catch (err) {
+        console.error(`Failed to add base role to ${member.user.tag}:`, err);
+      }
+    }
+
+    try {
+      await message.channel.send(
+        `✅ Done! Tried to give **${baseRoleName}** to **${attempted}** members. Successfully updated **${success}**.`
+      );
+    } catch (err) {
+      console.error("Failed to send initpatrons completion message:", err);
+    }
+  }
+
   if (content === "!drink") {
     return message.reply(`🍺 ${pick(drinks)}`);
   }
@@ -311,6 +375,37 @@ async function handleLevelUp(member, level) {
     );
   }
 
+    // 📜 !level
+  if (message.content === "!level") {
+    return message.reply(
+      `📊 **Tavern Standing**\nXP: ${userXp}\nLevel: ${level}`
+    );
+  }
+
+    // 🏆 !leaderboard
+  if (message.content === "!leaderboard") {
+    const entries = Object.entries(xp);
+
+    if (entries.length === 0) {
+      return message.reply(
+        "No one has earned any tavern reputation yet. The night is young!"
+      );
+    }
+
+    const top = entries
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+
+    let board = "🏆 **Tavern Leaderboard**\n\n";
+
+    top.forEach(([id, xpValue], index) => {
+      const lvl = getLevelFromXp(xpValue);
+      board += `${index + 1}. <@${id}> — XP: ${xpValue} (Level ${lvl})\n`;
+    });
+
+    return message.reply(board);
+  }
+  
   // 🐾 CAT
   if (content === "!cat" || content === "!petcat") {
     return message.reply(`🐾 ${pick(catResponses)}`);
@@ -371,6 +466,29 @@ async function handleLevelUp(member, level) {
   if (content === "!gold") {
     return message.reply(formatGold(getGold(userId)));
   }
+});
+
+  //reponses to thank you
+const welcomeReplies = [
+  "🍻 You're most welcome!",
+  "🐾 Anytime, traveler.",
+  "🍺 Glad to be of service!",
+  "🔥 May your tales be many and your drinks be full!",
+  "🎶 Think nothing of it — enjoy the hearth!"
+];
+
+if (message.reference && !message.author.bot) {
+  const repliedTo = await message.channel.messages.fetch(message.reference.messageId).catch(() => null);
+
+  if (repliedTo && repliedTo.author.id === client.user.id) {
+    const thankWords = ["thank you", "thanks", "ty", "tysm", "thx", "thank you good sir"];
+    if (thankWords.some(w => message.content.toLowerCase().includes(w))) {
+      const line = welcomeReplies[Math.floor(Math.random() * welcomeReplies.length)];
+      message.reply(line).catch(() => {});
+    }
+  }
+}
+
 });
 
 // ================= LOGIN =================
