@@ -514,7 +514,7 @@ if (containsThanks(message.content)) {
     return message.reply(line).catch(() => {});
   }
 }
-
+});
 
 
 
