@@ -43,8 +43,6 @@ const GOODBYE_CHANNEL_ID = "1249723774748721264";
 const CHAT_CHANNEL_ID = "1101697334934515794";
 
 // ================= STORAGE =================
-const xp = {};
-const gold = {}; // ✅ FIXED
 const cooldown = new Set();
 const STARTING_GOLD = 20;
 
@@ -87,21 +85,20 @@ const goodbyeMessages = [
 ];
 
 // 🍺 Tavern Data
-const drinks = [
-  "Honeyed Mead 🍯",
-  "Dark Dwarven Stout 🍺",
-  "Spiced Apple Cider 🍎",
-  "Moonberry Wine 🌙",
-  "Whiskers’ Cream Ale 🐾",
-  "Smoked Oak Whiskey 🪵"
-];
-
-const specials = [
-  "Slow-roasted stew with crusty bread 🍲",
-  "Herbed chicken pie 🥧",
-  "Spiced cider by the hearth 🔥",
-  "Fresh fish (the cat is watching closely) 🐟"
-];
+const menu = {
+  drinks: [
+    { name: "Honeyed Mead", emoji: "🍯", price: 3, desc: "Sweet, warm, and dangerously easy to love." },
+    { name: "Dark Dwarven Stout", emoji: "🍺", price: 4, desc: "Thick as a dungeon wall—smooth as a bard’s lie." },
+    { name: "Spiced Apple Cider", emoji: "🍎", price: 3, desc: "A cozy sip that tastes like autumn stories." },
+    { name: "Moonberry Wine", emoji: "🌙", price: 5, desc: "Fruity, mysterious, and a little enchanted." },
+    { name: "Whiskers’ Cream Ale", emoji: "🐾", price: 4, desc: "House favorite—served with a judgmental cat stare." },
+    { name: "Smoked Oak Whiskey", emoji: "🪵", price: 6, desc: "Smoky, bold, and perfect for late-night confessions." }
+  ],
+  food: [
+    { name: "Slow-roasted Stew", emoji: "🍲", price: 6, desc: "Hearty stew with crusty bread—pure comfort." },
+    { name: "Herbed Chicken Pie", emoji: "🥧", price: 6, desc: "Flaky crust, savory, instant happiness." }
+  ]
+};
 
 const catResponses = [
   "The tavern cat accepts your affection… briefly. 🐾",
@@ -196,9 +193,8 @@ client.once("ready", () => {
   console.log(`🍺 ${client.user.tag} is online!`);
 
   loadData(); // ✅ LOAD HERE
-});
-
-  // ✅ Tavern chatter restored
+  
+    // ✅ Tavern chatter restored
   setInterval(async () => {
     try {
       const channel = await client.channels.fetch(CHAT_CHANNEL_ID);
@@ -210,6 +206,8 @@ client.once("ready", () => {
     }
   }, 1000 * 60 * 60 * 36);
 });
+
+
 
 // ================= JOIN / LEAVE =================
 client.on("guildMemberAdd", member => {
